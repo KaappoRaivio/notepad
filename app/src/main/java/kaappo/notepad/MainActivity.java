@@ -1,12 +1,17 @@
 package kaappo.notepad;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -20,29 +25,61 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onSave(View view) {
-        String body = findViewById(R.id.body).toString();
-        String title = findViewById(R.id.title).toString();
+        EditText bodyfield = (EditText) findViewById(R.id.body);
+        EditText titlefield = (EditText) findViewById(R.id.title);
+
+        String body = bodyfield.getText().toString();
+        String title = titlefield.getText().toString();
+
+
 
         Note note = new Note(body, title);
 
-        Save(title, note);
+        toasti(title);
+
+        save(title, note);
+
+        toasti(open(title).getTitle());
+
+
 
     }
 
-    public void Save(String fileName, Note content) {
+    public void save(String fileName, Note content) {
+        boolean success = false;
+
         try {
-            OutputStreamWriter out =
-                    new OutputStreamWriter(openFileOutput(fileName, 0));
+            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(fileName, 0));
             out.write(content.repr());
             out.close();
-            toasti("onnistui");
+            success = true;
         } catch (Throwable t) {
             toasti("ei onnistunut" + t.toString());
         }
+
+        if (success) {
+            writeToMaster(fileName, this);
+        }
+        else {
+            toasti("ongelma!");
+        }
     }
 
+    private void writeToMaster(String fName, Context context) {
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("masterTable.txt", Context.MODE_APPEND));
+            outputStreamWriter.write(fName + "\n");
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
+
+
     public void toasti(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     public boolean FileExists(String fname){
@@ -50,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         return file.exists();
     }
 
-    public String Open(String fileName) {
+    public Note open(String fileName) {
         String content = "";
 
         if (FileExists(fileName)) {
@@ -78,6 +115,13 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        return content;
+        return Note.fromRepr(content);
+    }
+
+    public void showSaved(View view) {
+        Intent intent = new Intent(this, ShowNotes.class);
+
+        startActivity(intent);
+
     }
 }
