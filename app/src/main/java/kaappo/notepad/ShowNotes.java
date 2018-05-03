@@ -1,6 +1,7 @@
 package kaappo.notepad;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -48,6 +49,8 @@ public class ShowNotes extends AppCompatActivity {
             noteViewHolder.body.setText(this.entries.get(i).getBody());
 
             noteViewHolder.card.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            //noteViewHolder.card.getLayoutParams().height = 256;
+
 
             noteViewHolder.card.setTag(this.entries.get(i).getId());
         }
@@ -70,5 +73,15 @@ public class ShowNotes extends AppCompatActivity {
             body = (TextView) view.findViewById(R.id.body);
             card = (CardView) view.findViewById(R.id.card);
         }
+    }
+
+    public void openNote(View v) {
+        Note note = Note.findNoteById((Integer) v.getTag());
+        System.out.println("" + (Integer) v.getTag() + " " + note.getTitle());
+        String title = note.getTitle();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("name", title);
+        startActivity(intent);
     }
 }

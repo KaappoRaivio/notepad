@@ -1,5 +1,7 @@
 package kaappo.notepad;
 
+import android.support.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,5 +75,15 @@ public class Note {
         timeCreated = Long.parseLong(repr.substring(indexes.get(2) + 1, indexes.get(3)));
 
         return new Note(body, title, timeCreated);
+    }
+
+    @Nullable
+    public static Note findNoteById(int iID) {
+        for (Note i : instances) {
+            if (i.getId() == iID) {
+                return i;
+            }
+        }
+        return null;
     }
 }

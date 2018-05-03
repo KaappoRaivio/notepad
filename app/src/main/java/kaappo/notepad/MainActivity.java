@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -20,6 +21,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Intent intent = getIntent();
+        if (intent.hasExtra("name")) {
+            Note note = open(intent.getStringExtra("name"));
+            TextView body = (TextView) findViewById(R.id.body);
+            TextView title = (TextView) findViewById(R.id.title);
+
+            body.setText(note.getBody());
+            title.setText(note.getTitle());
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
