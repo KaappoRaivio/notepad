@@ -8,7 +8,7 @@ import java.util.List;
 public class Note {
     private static List<Note> instances = new ArrayList<>();
 
-    static int numberOfInstances;
+    private static int numberOfInstances;
 
     private String body;
     private String title;
@@ -29,6 +29,16 @@ public class Note {
         this.body = body;
         this.title = title;
         this.timeCreated = timeCreated;
+
+        Note.instances.add(this);
+        this.id = Note.numberOfInstances++;
+    }
+
+    Note(String body, String title, long timeCreated, int id) {
+        this.body = body;
+        this.title = title;
+        this.timeCreated = timeCreated;
+        this.id = id;
 
         Note.instances.add(this);
     }
@@ -70,8 +80,8 @@ public class Note {
             }
         }
 
-        body = repr.substring(indexes.get(0), indexes.get(1));
-        title = repr.substring(indexes.get(1), indexes.get(2));
+        body = repr.substring(indexes.get(0) + 1, indexes.get(1));
+        title = repr.substring(indexes.get(1) + 1, indexes.get(2));
         timeCreated = Long.parseLong(repr.substring(indexes.get(2) + 1, indexes.get(3)));
 
         return new Note(body, title, timeCreated);
@@ -79,11 +89,27 @@ public class Note {
 
     @Nullable
     public static Note findNoteById(int iID) {
-        for (Note i : instances) {
-            if (i.getId() == iID) {
-                return i;
+        int index = -1;
+
+        for (int i = 0; i < instances.size(); i++) {
+            if (instances.get(i).getId() == iID) {
+                index = i;
+                break;
+
             }
         }
-        return null;
+
+        if (index != -1) {
+            System.out.println("instance: " + instances.get(index).getTitle());
+            return instances.get(index);
+            //return instances.get(2);
+        }
+        else {
+            System.out.println("findEntryById: Invalid index " + iID + "!");
+            return null;
+        }
+
     }
+
+
 }

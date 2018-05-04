@@ -53,6 +53,8 @@ public class ShowNotes extends AppCompatActivity {
 
 
             noteViewHolder.card.setTag(this.entries.get(i).getId());
+            System.out.println(i);
+            System.out.println(this.entries.get(i).getTitle());
         }
 
         @Override
@@ -76,12 +78,19 @@ public class ShowNotes extends AppCompatActivity {
     }
 
     public void openNote(View v) {
-        Note note = Note.findNoteById((Integer) v.getTag());
-        System.out.println("" + (Integer) v.getTag() + " " + note.getTitle());
+        int noteId = (Integer) v.getTag();
+        Note note = Note.findNoteById(noteId);
+        System.out.println("" + noteId + " " + note.getTitle());
         String title = note.getTitle();
 
+        Bundle bundle = new Bundle();
+        bundle.putString("title", note.getTitle());
+        bundle.putString("body", note.getBody());
+        bundle.putLong("timeCreated", note.getTimeCreated());
+        bundle.putInt("id", note.getId());
+
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("name", title);
+        intent.putExtra("note", bundle);
         startActivity(intent);
     }
 }

@@ -22,17 +22,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
-        if (intent.hasExtra("name")) {
-            Note note = open(intent.getStringExtra("name"));
-            TextView body = (TextView) findViewById(R.id.body);
-            TextView title = (TextView) findViewById(R.id.title);
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        
+        if (intent.hasExtra("note")) {
+
+            Bundle bundle = intent.getBundleExtra("note");
+
+            String noteTitle = bundle.getString("title");
+            String noteBody = bundle.getString("body");
+            int noteId = bundle.getInt("id");
+            long noteTimeCreated = bundle.getLong("timeCreated");
+
+
+            Note note = new Note(noteBody, noteTitle, noteTimeCreated, noteId);
+
+            System.out.println("oncreate: title:" + note.getTitle());
+            System.out.println("oncreate: body:" + note.getBody());
+
+
+            EditText body = (EditText) findViewById(R.id.body);
+            EditText title = (EditText) findViewById(R.id.title);
 
             body.setText(note.getBody());
             title.setText(note.getTitle());
         }
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
     }
 
     public void onSave(View view) {
