@@ -11,19 +11,11 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class DatabaseHandler {
 
-    private static boolean canInstantiate = true;
-    private static Context context;
-
-    DatabaseHandler(Context context){
-        if (canInstantiate) {
-            DatabaseHandler.context = context;
-            DatabaseHandler.canInstantiate = false;
-        }
-    }
+    private DatabaseHandler(){}
 
 
     private static Context getContext () {
-        return DatabaseHandler.context;
+        return MainActivity.getAppContext();
     }
 
     public static Note openNoteByID (int noteID) {
@@ -57,7 +49,7 @@ public class DatabaseHandler {
     }
 
     public static List<Note> getAllNotes () {
-        SQLiteDatabase db = context.openOrCreateDatabase("notes", MODE_PRIVATE ,null);
+        SQLiteDatabase db = getContext().openOrCreateDatabase("notes", MODE_PRIVATE ,null);
 
         List<Note> notes = new ArrayList<>();
 

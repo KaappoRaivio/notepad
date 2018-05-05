@@ -22,12 +22,16 @@ import java.sql.ResultSet;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MainActivity.context = getApplicationContext();
 
         SQLiteDatabase db = openOrCreateDatabase("notes", MODE_PRIVATE, null);
         db.execSQL("CREATE TABLE IF NOT EXISTS notes(title TEXT, body TEXT, timeCreated TEXT, ID TEXT)");
@@ -55,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
             title.setText(note.getTitle());
         }
 
-        new DatabaseHandler(this);
 
     }
 
@@ -148,5 +151,9 @@ public class MainActivity extends AppCompatActivity {
 
         startActivity(intent);
 
+    }
+
+    public static Context getAppContext() {
+        return MainActivity.context;
     }
 }
