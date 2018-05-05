@@ -1,6 +1,8 @@
 package kaappo.notepad;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,81 +12,34 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class NoteListProvider {
     static List<Note> get(Context context) {
-        List<Note> tempList = new ArrayList<>();
 
-        String[] masterTable = readFromMaster(context).split("\n");
+        SQLiteDatabase db = context.openOrCreateDatabase("notes", MODE_PRIVATE ,null);
 
-        for (String i : masterTable) {
-            tempList.add(open(i, context));
-        }
+        List<Note> notes = new ArrayList<>();
 
-        return tempList;
-    }
+        Cursor resultSet = db.rawQuery("Select * from notes", null);
 
-    public static boolean FileExists(String fname, Context context) {
-        File file = context.getFileStreamPath(fname);
-        return file.exists();
-    }
+        while (resultSet.moveToNext()) {
+            String title = resultSet.getString(resultSet.getColumnIndex("title"));
+            String body = resultSet.getString(resultSet.getColumnIndex("body"));
+            long timeCreated = Long.parseLong(resultSet.getString(resultSet.getColumnIndex("timeCreated")));
+            int  ID = Integer.parseInt(resultSet.getString(resultSet.getColumnIndex("ID")));
 
-    public static Note open(String fileName, Context context) {
-        String content = "";
-
-        if (FileExists(fileName, context)) {
-
-            try {
-                InputStream in = context.openFileInput(fileName);
-                if (in != null) {
-                    InputStreamReader tmp = new InputStreamReader(in);
-                    BufferedReader reader = new BufferedReader(tmp);
-
-                    String str;
-                    StringBuilder buf = new StringBuilder();
-
-                    while ((str = reader.readLine()) != null) {
-                        buf.append(str + "\n");
-                    }
-                    in.close();
-
-                    content = buf.toString();
-                }
-
-            } catch (Throwable e) {
-            }
+            Note note = new Note(body, title, timeCreated, ID);
+            notes.add(note);
 
         }
 
-        return Note.fromRepr(content);
+        resultSet.close();
+
+        return notes;
+
+
     }
 
-    public static String readFromMaster(Context context) {
-        String content = "";
 
-        if (FileExists("masterTable.txt", context)) {
-
-            try {
-                InputStream in = context.openFileInput("masterTable.txt");
-                if (in != null) {
-                    InputStreamReader tmp = new InputStreamReader(in);
-                    BufferedReader reader = new BufferedReader(tmp);
-
-                    String str;
-                    StringBuilder buf = new StringBuilder();
-
-                    while ((str = reader.readLine()) != null) {
-                        buf.append(str + "\n");
-                    }
-                    in.close();
-
-                    content = buf.toString();
-                }
-
-            } catch (Throwable t) {
-            }
-
-        }
-
-        return content;
-    }
 }

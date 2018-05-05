@@ -2,6 +2,8 @@ package kaappo.notepad;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.sql.ResultSet;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SQLiteDatabase db = openOrCreateDatabase("notes", MODE_PRIVATE, null);
+        db.execSQL("CREATE TABLE IF NOT EXISTS notes(title TEXT, body TEXT, timeCreated TEXT, ID TEXT)");
         
         if (intent.hasExtra("note")) {
 
@@ -60,47 +66,32 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        Note note = new Note(body, title);
+        Note note = new Note(body, title, this);
 
         toasti(title);
 
-        save(title, note);
+        save(note);
 
-        toasti(open(title).getTitle());
+        showSaved(null);
+
 
 
 
     }
 
-    public void save(String fileName, Note content) {
-        boolean success = false;
+    public void save(Note content) {
+        SQLiteDatabase db = openOrCreateDatabase("notes", MODE_PRIVATE, null);
+        //db.execSQL("CREATE TABLE IF NOT EXISTS notes(title TEXT, body TEXT, timeCreated TEXT, ID TEXT)");
 
-        try {
-            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(fileName, 0));
-            out.write(content.repr());
-            out.close();
-            success = true;
-        } catch (Throwable t) {
-            toasti("ei onnistunut" + t.toString());
-        }
+        db.execSQL("INSERT INTO notes VALUES('"
+                + content.getTitle() + "', '"
+                + content.getBody() + "', '"
+                + content.getTimeCreated() + "', '"
+                + content.getId()
+                + "');"
+        );
 
-        if (success) {
-            writeToMaster(fileName, this);
-        }
-        else {
-            toasti("ongelma!");
-        }
-    }
 
-    private void writeToMaster(String fName, Context context) {
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("masterTable.txt", Context.MODE_APPEND));
-            outputStreamWriter.write(fName + "\n");
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
     }
 
 
@@ -109,41 +100,46 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    public boolean FileExists(String fname){
-        File file = getBaseContext().getFileStreamPath(fname);
-        return file.exists();
+
+
+    public Note open(String name) {
+
+        SQLiteDatabase db = openOrCreateDatabase("notes", MODE_PRIVATE,null);
+
+        Cursor resultSet = db.rawQuery("Select * from notes where title = '" + name + "';", null);
+
+        resultSet.moveToFirst();
+
+        String title = resultSet.getString(resultSet.getColumnIndex("title"));
+        String body = resultSet.getString(resultSet.getColumnIndex("body"));
+        long timeCreated = Long.parseLong(resultSet.getString(resultSet.getColumnIndex("timeCreated")));
+        int  ID = Integer.parseInt(resultSet.getString(resultSet.getColumnIndex("ID")));
+
+        resultSet.close();
+
+        return new Note(body, title, timeCreated, ID);
+
     }
 
-    public Note open(String fileName) {
-        String content = "";
+    public Note open(int mID) {
 
-        if (FileExists(fileName)) {
+        SQLiteDatabase db = openOrCreateDatabase("notes", MODE_PRIVATE,null);
 
-            try {
-                InputStream in = openFileInput(fileName);
-                if ( in != null) {
-                    InputStreamReader tmp = new InputStreamReader( in );
-                    BufferedReader reader = new BufferedReader(tmp);
+        Cursor resultSet = db.rawQuery("Select * from notes where ID = '" + mID + "';", null);
 
-                    String str;
-                    StringBuilder buf = new StringBuilder();
+        resultSet.moveToFirst();
 
-                    while ((str = reader.readLine()) != null) {
-                        buf.append(str + "\n");
-                    }
-                    in.close();
+        String title = resultSet.getString(resultSet.getColumnIndex("title"));
+        String body = resultSet.getString(resultSet.getColumnIndex("body"));
+        long timeCreated = Long.parseLong(resultSet.getString(resultSet.getColumnIndex("timeCreated")));
+        int  ID = Integer.parseInt(resultSet.getString(resultSet.getColumnIndex("ID")));
 
-                    content = buf.toString();
-                }
+        resultSet.close();
 
-            }
-            catch (java.io.FileNotFoundException e) {toasti("Ei löydy!");} catch (Throwable t) {
-                toasti("Virhe" + t.toString());
-            }
-        }
+        return new Note(body, title, timeCreated, ID);
 
-        return Note.fromRepr(content);
     }
+
 
     public void showSaved(View view) {
         Intent intent = new Intent(this, ShowNotes.class);

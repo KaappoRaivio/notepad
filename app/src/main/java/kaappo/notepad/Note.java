@@ -1,5 +1,8 @@
 package kaappo.notepad;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -15,23 +18,23 @@ public class Note {
     private long timeCreated;
     private int id;
 
-    Note(String body, String title) {
+    Note(String body, String title, Context context) {
         this.body = body;
         this.title = title;
         this.timeCreated = System.currentTimeMillis();
 
         Note.instances.add(this);
 
-        this.id = Note.numberOfInstances++;
+        this.id = getFreeID(context);
     }
 
-    private Note(String body, String title, long timeCreated) {
+    private Note(String body, String title, long timeCreated, Context context) {
         this.body = body;
         this.title = title;
         this.timeCreated = timeCreated;
 
         Note.instances.add(this);
-        this.id = Note.numberOfInstances++;
+        this.id = getFreeID(context);
     }
 
     Note(String body, String title, long timeCreated, int id) {
@@ -63,29 +66,6 @@ public class Note {
         return instances;
     }
 
-    public String repr() {
-        return "\t" + body + "\t" + title + "\t" + timeCreated + "\t";
-    }
-
-    public static Note fromRepr(String repr) {
-        String title;
-        String body;
-        long timeCreated;
-
-        List<Integer> indexes = new ArrayList<>();
-
-        for (int i = 0; i < repr.length(); i++) {
-            if (repr.substring(i, i + 1).equals("\t")) {
-                indexes.add(i);
-            }
-        }
-
-        body = repr.substring(indexes.get(0) + 1, indexes.get(1));
-        title = repr.substring(indexes.get(1) + 1, indexes.get(2));
-        timeCreated = Long.parseLong(repr.substring(indexes.get(2) + 1, indexes.get(3)));
-
-        return new Note(body, title, timeCreated);
-    }
 
     @Nullable
     public static Note findNoteById(int iID) {
@@ -109,6 +89,22 @@ public class Note {
             return null;
         }
 
+    }
+
+    public static int getFreeID(Context context) {
+        SQLiteDatabase db = context.openOrCreateDatabase("notes", Context.MODE_PRIVATE, null);
+
+        Cursor resultSet = db.rawQuery("SELECT MAX(ID) FROM notes;", null);
+
+        resultSet.moveToFirst();
+
+        int biggestID = Integer.parseInt(resultSet.getString(0));
+
+        /*if (biggestID == null) {
+            biggestID = 0;
+        }*/
+
+        return biggestID + 1;
     }
 
 
