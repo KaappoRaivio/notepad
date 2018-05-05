@@ -2,6 +2,8 @@ package kaappo.notepad;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -25,7 +27,7 @@ public class ShowNotes extends AppCompatActivity {
 
         RecyclerView rv = (RecyclerView) findViewById(R.id.noteList);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(new NoteAdapter(new NoteListProvider().get(this)));
+        rv.setAdapter(new NoteAdapter(new NoteListProvider().get()));
     }
 
     class NoteAdapter extends RecyclerView.Adapter<NoteViewHolder> {
@@ -51,8 +53,13 @@ public class ShowNotes extends AppCompatActivity {
             noteViewHolder.card.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
             //noteViewHolder.card.getLayoutParams().height = 256;
 
+            SQLiteDatabase db = openOrCreateDatabase("notes", MODE_PRIVATE, null);
+            Cursor result = db.rawQuery("Select * from notes where ID ='" + this.entries.get(i).getId() + "';", null);
+            result.moveToFirst();
+            int noteID = Integer.parseInt(result.getString(result.getColumnIndex("ID")));
+            result.close();
 
-            noteViewHolder.card.setTag(this.entries.get(i).getId());
+            noteViewHolder.card.setTag(noteID);
             System.out.println(i);
             System.out.println(this.entries.get(i).getTitle());
         }
@@ -78,9 +85,9 @@ public class ShowNotes extends AppCompatActivity {
     }
 
     public void openNote(View v) {
-        int noteId = (Integer) v.getTag();
-        Note note = Note.findNoteById(noteId);
-        System.out.println("" + noteId + " " + note.getTitle());
+        int noteID = (Integer) v.getTag();
+        Note note = DatabaseHandler.openNoteByID(noteID);
+        System.out.println("" + noteID + " " + note.getTitle());
         String title = note.getTitle();
 
         Bundle bundle = new Bundle();

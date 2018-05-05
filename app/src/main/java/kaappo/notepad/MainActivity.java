@@ -55,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
             title.setText(note.getTitle());
         }
 
+        new DatabaseHandler(this);
+
     }
 
     public void onSave(View view) {
