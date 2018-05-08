@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -60,6 +61,7 @@ public class ShowNotes extends AppCompatActivity {
             result.close();
 
             noteViewHolder.card.setTag(noteID);
+            noteViewHolder.delete.setTag(noteID);
             System.out.println(i);
             System.out.println(this.entries.get(i).getTitle());
         }
@@ -75,12 +77,14 @@ public class ShowNotes extends AppCompatActivity {
         TextView title;
         TextView body;
         CardView card;
+        ImageButton delete;
 
         NoteViewHolder(View view) {
             super(view);
             title = (TextView) view.findViewById(R.id.title);
             body = (TextView) view.findViewById(R.id.body);
             card = (CardView) view.findViewById(R.id.card);
+            delete = (ImageButton) view.findViewById(R.id.ImageButton01);
         }
     }
 
@@ -99,5 +103,14 @@ public class ShowNotes extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("note", bundle);
         startActivity(intent);
+    }
+
+    public void onDeleteButtonClick(View v) {
+        int noteID = (Integer) v.getTag();
+        DatabaseHandler.deleteNoteByID(noteID);
+
+        RecyclerView rv = (RecyclerView) findViewById(R.id.noteList);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setAdapter(new NoteAdapter(new NoteListProvider().get()));
     }
 }

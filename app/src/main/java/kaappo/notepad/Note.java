@@ -98,11 +98,19 @@ public class Note {
 
         resultSet.moveToFirst();
 
-        int biggestID = Integer.parseInt(resultSet.getString(0));
+        String result = resultSet.getString(0);
 
-        /*if (biggestID == null) {
+        int biggestID;
+
+        if (result == null) {
             biggestID = 0;
-        }*/
+
+        }
+        else {
+            biggestID = Integer.parseInt(result);
+        }
+
+
 
         return biggestID + 1;
     }

@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.context = getApplicationContext();
 
         SQLiteDatabase db = openOrCreateDatabase("notes", MODE_PRIVATE, null);
-        db.execSQL("CREATE TABLE IF NOT EXISTS notes(title TEXT, body TEXT, timeCreated TEXT, ID TEXT)");
+
         
         if (intent.hasExtra("note")) {
 
@@ -58,6 +58,10 @@ public class MainActivity extends AppCompatActivity {
             body.setText(note.getBody());
             title.setText(note.getTitle());
         }
+        else {
+            db.execSQL("CREATE TABLE IF NOT EXISTS notes(title TEXT, body TEXT, timeCreated TEXT, ID TEXT PRIMARY KEY)");
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS idx_positions_title ON notes (ID);");
+        }
 
 
     }
@@ -75,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         toasti(title);
 
-        save(note);
+        DatabaseHandler.replaceNoteByID(note);
 
         showSaved(null);
 

@@ -71,4 +71,19 @@ public class DatabaseHandler {
         return notes;
     }
 
+    public static void deleteNoteByID (int noteID) {
+        SQLiteDatabase db = getContext().openOrCreateDatabase("notes", Context.MODE_PRIVATE, null);
+        db.execSQL("DELETE FROM notes WHERE ID = '" + noteID + "';");
+    }
+
+    public static void replaceNoteByID (int noteID, Note newNote) {
+        SQLiteDatabase db = getContext().openOrCreateDatabase("notes", Context.MODE_PRIVATE, null);
+        db.execSQL("UPDATE notes VALUES('" + newNote.getTitle() + "', '"
+                + newNote.getBody() + "', '"
+                + newNote.getTimeCreated() + "', '"
+                + newNote.getId() + ");"
+                + "WHERE ID = '" + noteID + "';"
+        );
+    }
+
 }
