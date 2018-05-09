@@ -18,23 +18,23 @@ public class Note {
     private long timeCreated;
     private int id;
 
-    Note(String body, String title, Context context) {
+    Note(String body, String title) {
         this.body = body;
         this.title = title;
         this.timeCreated = System.currentTimeMillis();
 
         Note.instances.add(this);
 
-        this.id = getFreeID(context);
+        this.id = getFreeID();
     }
 
-    private Note(String body, String title, long timeCreated, Context context) {
+    private Note(String body, String title, long timeCreated) {
         this.body = body;
         this.title = title;
         this.timeCreated = timeCreated;
 
         Note.instances.add(this);
-        this.id = getFreeID(context);
+        this.id = getFreeID();
     }
 
     Note(String body, String title, long timeCreated, int id) {
@@ -91,7 +91,9 @@ public class Note {
 
     }
 
-    public static int getFreeID(Context context) {
+    public static int getFreeID() {
+
+        Context context = MainActivity.getAppContext();
         SQLiteDatabase db = context.openOrCreateDatabase("notes", Context.MODE_PRIVATE, null);
 
         Cursor resultSet = db.rawQuery("SELECT MAX(ID) FROM notes;", null);

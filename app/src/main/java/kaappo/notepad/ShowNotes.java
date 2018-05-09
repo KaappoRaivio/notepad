@@ -52,13 +52,8 @@ public class ShowNotes extends AppCompatActivity {
             noteViewHolder.body.setText(this.entries.get(i).getBody());
 
             noteViewHolder.card.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            //noteViewHolder.card.getLayoutParams().height = 256;
 
-            SQLiteDatabase db = openOrCreateDatabase("notes", MODE_PRIVATE, null);
-            Cursor result = db.rawQuery("Select * from notes where ID ='" + this.entries.get(i).getId() + "';", null);
-            result.moveToFirst();
-            int noteID = Integer.parseInt(result.getString(result.getColumnIndex("ID")));
-            result.close();
+            int noteID = this.entries.get(i).getId();
 
             noteViewHolder.card.setTag(noteID);
             noteViewHolder.delete.setTag(noteID);
@@ -92,16 +87,12 @@ public class ShowNotes extends AppCompatActivity {
         int noteID = (Integer) v.getTag();
         Note note = DatabaseHandler.openNoteByID(noteID);
         System.out.println("" + noteID + " " + note.getTitle());
-        String title = note.getTitle();
 
-        Bundle bundle = new Bundle();
-        bundle.putString("title", note.getTitle());
-        bundle.putString("body", note.getBody());
-        bundle.putLong("timeCreated", note.getTimeCreated());
-        bundle.putInt("id", note.getId());
 
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("note", bundle);
+
+
+        Intent intent = new Intent(this, EditNote.class);
+        intent.putExtra(MainActivity.NOTE_INTENT_KEY, note.getId());
         startActivity(intent);
     }
 

@@ -22,6 +22,8 @@ import java.sql.ResultSet;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String NOTE_INTENT_KEY = "Intent.Extra.String.ID";
+
     private static Context context;
 
     @Override
@@ -75,11 +77,11 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        Note note = new Note(body, title, this);
+        Note note = new Note(body, title);
 
         toasti(title);
 
-        DatabaseHandler.replaceNoteByID(note);
+        DatabaseHandler.saveNote(note);
 
         showSaved(null);
 
